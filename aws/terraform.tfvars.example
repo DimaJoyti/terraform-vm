@@ -1,0 +1,33 @@
+# Terraform Variables Configuration for AWS VM Deployment
+# Copy this file to terraform.tfvars and customize the values
+
+# AWS Region
+region = "eu-central-1"
+
+# Instance Configuration
+# Set to true for GPU instance (g4dn.xlarge) or false for CPU instance (t3.micro)
+gpu_enabled = false
+
+# SSH Key Configuration
+# Path to your SSH public key file
+ssh_pub_key = "~/.ssh/terraform-aws.pub"
+
+# Open Web UI Configuration
+# Username for accessing the web interface
+open_webui_user = "admin@demo.gs"
+
+# OpenAI Integration (Optional)
+# Leave empty if you want to use local LLMs only
+openai_key = ""
+openai_base = "https://api.openai.com/v1"
+
+# AMI Configuration (Advanced)
+# Leave empty to use the latest Debian 11 AMI
+custom_ami = ""
+ami_name = "debian-11-amd64-*"
+ami_owners = ["136693071363"]
+
+# Provisioning Script
+# Use "scripts/provision_vars.sh" for base images
+# Use "scripts/configure.sh" for custom AMIs built with Packer
+provision_script = "scripts/provision_vars.sh"
