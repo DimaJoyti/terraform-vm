@@ -1,6 +1,54 @@
 # AWS VM Deployment Guide
 
-## Quick Start
+This guide covers deploying the AWS VM with Open Web UI using both Bricks CLI (recommended) and direct Terraform.
+
+## Method 1: Deploy with Bricks CLI (Recommended)
+
+### Prerequisites
+1. **Bricks CLI** installed and configured
+2. **AWS Account** with programmatic access
+3. **AWS Credentials** configured as environment variables
+4. **SSH Key** generated for VM access
+
+### Quick Deployment
+
+1. **Configure AWS Credentials**
+   ```bash
+   export AWS_ACCESS_KEY_ID="your-access-key"
+   export AWS_SECRET_ACCESS_KEY="your-secret-key"
+   export AWS_REGION="eu-central-1"
+   ```
+
+2. **Deploy with Bricks**
+   ```bash
+   # Basic CPU deployment
+   bricks run . --var ssh_pub_key="~/.ssh/terraform-aws.pub"
+
+   # GPU deployment for local LLMs
+   bricks run . --var gpu_enabled=true --var ssh_pub_key="~/.ssh/terraform-aws.pub"
+
+   # With OpenAI integration
+   bricks run . \
+     --var ssh_pub_key="~/.ssh/terraform-aws.pub" \
+     --var openai_key="your-openai-api-key"
+   ```
+
+3. **Using Variables File**
+   Create `variables.yaml`:
+   ```yaml
+   region: "eu-central-1"
+   gpu_enabled: false
+   ssh_pub_key: "~/.ssh/terraform-aws.pub"
+   open_webui_user: "admin@yourcompany.com"
+   openai_key: "your-openai-api-key"
+   ```
+
+   Deploy:
+   ```bash
+   bricks run . --var-file variables.yaml
+   ```
+
+## Method 2: Direct Terraform Deployment
 
 ### Prerequisites
 1. **AWS Account** with programmatic access
@@ -16,14 +64,13 @@
    export AWS_ACCESS_KEY_ID="your-access-key"
    export AWS_SECRET_ACCESS_KEY="your-secret-key"
    export AWS_REGION="eu-central-1"
-   
+
    # Or run the setup script
    ./setup-credentials.sh
    ```
 
 2. **Initialize Terraform**
    ```bash
-   cd aws
    terraform init
    ```
 
@@ -31,7 +78,7 @@
    ```bash
    # Edit terraform.tfvars if needed
    nano terraform.tfvars
-   
+
    # Plan deployment
    terraform plan
    ```

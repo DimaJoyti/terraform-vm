@@ -45,7 +45,6 @@ Each cloud provider has its own directory with complete infrastructure configura
 ## Documentation
 
 - Each provider directory contains detailed setup instructions
-- See [CLAUDE.md](CLAUDE.md) for development guidance
 - Check individual README files for provider-specific requirements
 
 ## Security

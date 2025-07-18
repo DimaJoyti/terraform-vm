@@ -1,0 +1,180 @@
+{
+  "apiVersion": "bricks/v1",
+  "kind": "Blueprint",
+  "metadata": {
+    "name": "terraform-vm-aws",
+    "displayName": "AWS VM with Open Web UI",
+    "description": "Deploy a virtual machine on AWS with Open Web UI for running LLMs locally or integrating with OpenAI APIs",
+    "version": "1.0.0",
+    "author": "Bluebricks",
+    "tags": ["aws", "vm", "terraform", "openwebui", "llm", "ai"],
+    "category": "Infrastructure"
+  },
+  "spec": {
+    "type": "terraform",
+    "source": ".",
+    "variables": {
+      "region": {
+        "type": "string",
+        "description": "The AWS region to deploy the VM",
+        "default": "eu-central-1",
+        "validation": {
+          "pattern": "^[a-z]{2}-[a-z]+-[0-9]$"
+        }
+      },
+      "gpu_enabled": {
+        "type": "boolean",
+        "description": "Enable GPU instance for local LLM processing",
+        "default": false
+      },
+      "machine": {
+        "type": "object",
+        "description": "Machine configuration for CPU and GPU instances",
+        "default": {
+          "gpu": { "type": "g4dn.xlarge" },
+          "cpu": { "type": "t3.micro" }
+        }
+      },
+      "custom_ami": {
+        "type": "string",
+        "description": "Custom AMI ID to use instead of default Debian 11",
+        "default": ""
+      },
+      "provision_script": {
+        "type": "string",
+        "description": "Path to the provisioning script",
+        "default": "scripts/provision_vars.sh"
+      },
+      "ami_name": {
+        "type": "string",
+        "description": "AMI name pattern to search for",
+        "default": "debian-11-amd64-*"
+      },
+      "ami_owners": {
+        "type": "array",
+        "description": "List of AMI owner IDs",
+        "default": ["136693071363"]
+      },
+      "open_webui_user": {
+        "type": "string",
+        "description": "Username for Open Web UI access",
+        "default": "admin@demo.gs",
+        "validation": {
+          "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+        }
+      },
+      "openai_base": {
+        "type": "string",
+        "description": "OpenAI API base URL",
+        "default": "https://api.openai.com/v1"
+      },
+      "openai_key": {
+        "type": "string",
+        "description": "OpenAI API key for LLM integration",
+        "default": "",
+        "sensitive": true
+      },
+      "ssh_pub_key": {
+        "type": "string",
+        "description": "Path to SSH public key file",
+        "default": "~/.ssh/terraform-aws.pub",
+        "required": true
+      },
+      "allowed_ssh_cidrs": {
+        "type": "array",
+        "description": "CIDR blocks allowed for SSH access",
+        "default": ["0.0.0.0/0"]
+      },
+      "allowed_web_cidrs": {
+        "type": "array",
+        "description": "CIDR blocks allowed for web access",
+        "default": ["0.0.0.0/0"]
+      },
+      "enable_detailed_monitoring": {
+        "type": "boolean",
+        "description": "Enable detailed CloudWatch monitoring",
+        "default": false
+      },
+      "enable_elastic_ip": {
+        "type": "boolean",
+        "description": "Assign an Elastic IP to the instance",
+        "default": true
+      },
+      "spot_price": {
+        "type": "string",
+        "description": "Maximum spot price for the instance",
+        "default": ""
+      },
+      "environment": {
+        "type": "string",
+        "description": "Environment name for resource tagging",
+        "default": "demo"
+      },
+      "project_name": {
+        "type": "string",
+        "description": "Project name for resource tagging",
+        "default": "terraform-vm"
+      }
+    },
+    "outputs": {
+      "public_ip": {
+        "description": "Public IP address of the deployed VM"
+      },
+      "password": {
+        "description": "Generated password for Open Web UI access",
+        "sensitive": true
+      },
+      "ssh_command": {
+        "description": "SSH command to connect to the VM"
+      },
+      "web_url": {
+        "description": "URL to access Open Web UI"
+      }
+    },
+    "requirements": {
+      "terraform": ">= 1.0",
+      "providers": {
+        "aws": "~> 5.70",
+        "terracurl": "~> 1.2",
+        "random": "~> 3.6"
+      }
+    },
+    "hooks": {
+      "pre_deploy": [
+        {
+          "name": "validate_ssh_key",
+          "command": "test -f ${var.ssh_pub_key}",
+          "description": "Validate SSH public key file exists"
+        }
+      ],
+      "post_deploy": [
+        {
+          "name": "health_check",
+          "command": "curl -f http://${output.public_ip} || echo 'Web UI may still be starting up'",
+          "description": "Check if Open Web UI is accessible"
+        }
+      ]
+    }
+  },
+  "documentation": {
+    "readme": "README.md",
+    "deployment_guide": "DEPLOYMENT_GUIDE.md",
+    "examples": [
+      {
+        "name": "Basic CPU deployment",
+        "description": "Deploy a t3.micro instance with OpenAI integration",
+        "variables": {
+          "gpu_enabled": false,
+          "openai_key": "your-openai-api-key"
+        }
+      },
+      {
+        "name": "GPU deployment for local LLMs",
+        "description": "Deploy a g4dn.xlarge instance for running local models",
+        "variables": {
+          "gpu_enabled": true
+        }
+      }
+    ]
+  }
+}

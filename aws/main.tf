@@ -64,25 +64,80 @@ variable "openai_key" {
 
 variable "ssh_pub_key" {
   description = "Public SSH key to be added to the VM"
+  type        = string
   default     = ""
 }
 
+variable "allowed_ssh_cidrs" {
+  description = "List of CIDR blocks allowed to SSH to the instance"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
+variable "allowed_web_cidrs" {
+  description = "List of CIDR blocks allowed to access the web interface"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
+variable "enable_detailed_monitoring" {
+  description = "Enable detailed CloudWatch monitoring"
+  type        = bool
+  default     = false
+}
+
+variable "enable_elastic_ip" {
+  description = "Assign an Elastic IP to the instance"
+  type        = bool
+  default     = true
+}
+
+variable "spot_price" {
+  description = "Maximum spot price for the instance"
+  type        = string
+  default     = ""
+}
+
+variable "environment" {
+  description = "Environment name for resource tagging"
+  type        = string
+  default     = "demo"
+}
+
+variable "project_name" {
+  description = "Project name for resource tagging"
+  type        = string
+  default     = "terraform-vm"
+}
+
 terraform {
+  required_version = ">= 1.0"
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "5.59.0"
+      version = "~> 5.70"
     }
     terracurl = {
       source  = "devops-rob/terracurl"
-      version = "1.2.1"
+      version = "~> 1.2"
     }
     random = {
       source  = "hashicorp/random"
-      version = "3.6.2"
+      version = "~> 3.6"
     }
   }
 }
 
 provider "aws" {
+  region = var.region
+
+  default_tags {
+    tags = {
+      Environment   = "demo"
+      Project       = "terraform-vm"
+      ManagedBy     = "terraform"
+      CreatedBy     = "openwebui-deployment"
+    }
+  }
 }

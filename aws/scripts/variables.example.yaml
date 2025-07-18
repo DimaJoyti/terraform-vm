@@ -1,0 +1,44 @@
+# Example Variables File for AWS VM with Open Web UI
+# Copy this file to variables.yaml and customize for your deployment
+
+# AWS Configuration
+region: "eu-central-1"  # Change to your preferred AWS region
+
+# Instance Configuration
+gpu_enabled: false  # Set to true for GPU instance (g4dn.xlarge)
+environment: "demo"  # Environment tag for resources
+project_name: "terraform-vm"  # Project name for resource tagging
+
+# SSH Access Configuration
+ssh_pub_key: "~/.ssh/terraform-aws.pub"  # Path to your SSH public key file
+
+# Security Configuration (IMPORTANT: Restrict these for production)
+allowed_ssh_cidrs:
+  - "0.0.0.0/0"  # Replace with your IP: ["YOUR_IP/32"]
+allowed_web_cidrs:
+  - "0.0.0.0/0"  # Replace with your IP: ["YOUR_IP/32"]
+
+# Open Web UI Configuration
+open_webui_user: "admin@demo.gs"  # Change to your email
+
+# OpenAI Integration (Optional)
+openai_key: ""  # Add your OpenAI API key here
+openai_base: "https://api.openai.com/v1"
+
+# Infrastructure Options
+enable_elastic_ip: true  # Assign static IP to instance
+enable_detailed_monitoring: false  # Enable CloudWatch detailed monitoring
+spot_price: ""  # Leave empty for default spot pricing
+
+# Advanced Configuration (usually don't need to change)
+custom_ami: ""  # Use custom AMI ID, leave empty for default Debian 11
+provision_script: "scripts/provision_vars.sh"
+ami_name: "debian-11-amd64-*"
+ami_owners: ["136693071363"]  # Debian official AMI owner
+
+# Machine Types (advanced users only)
+machine:
+  gpu:
+    type: "g4dn.xlarge"
+  cpu:
+    type: "t3.micro"
